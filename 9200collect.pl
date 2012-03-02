@@ -13,7 +13,7 @@
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-##
+###
 
 # This script ftp's the log files and crash dumps from a 9200 to the local machine.
 # It puts the files in a local directory of the hostname.
