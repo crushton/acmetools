@@ -4,7 +4,7 @@ My place to put scripts and things related to lazy administration of acme packet
 I started learning most of the languages here, so they may not be
 pretty.
 
-- *9200collect.pl*: collects log files from 9200, differentiates between
+- **9200collect.pl**: collects log files from 9200, differentiates between
   SPU1/NPU1, and SPU2/NPU2
 - clean4k.pl: cleans rotated log files out from C series
 - collect4k.pl: collects logs files on C series to local directory
