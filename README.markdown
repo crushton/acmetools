@@ -1,6 +1,8 @@
 # Acme Tools
 
 My place to put scripts and things related to lazy administration of acme packet gear.
+I started learning most of the languages here, so they may not be
+pretty.
 
 - 9200collect.pl: collects log files from 9200,differentiates between
   SPU1/NPU1, and SPU2/NPU2
@@ -10,6 +12,10 @@ My place to put scripts and things related to lazy administration of acme packet
   C620+ format
 - monitor4250.sh: simple snmp monitoring script for C series
 - monitor9200.sh: simple snmp monitoring script for D series
+
+- udplog: a udp logger on port 2600 for receiving and filtering udp
+  transmitted logs from the sbc, you can put in a specific string to
+  filter on and it will only display those lines
 
 - autoback.py: auto backup script for c series, this was made to run as
   a cron every day and it will login, create a backup config, and save a
