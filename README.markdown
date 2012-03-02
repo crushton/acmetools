@@ -6,18 +6,18 @@ pretty.
 
 - **9200collect.pl**: collects log files from 9200, differentiates between
   SPU1/NPU1, and SPU2/NPU2
-- clean4k.pl: cleans rotated log files out from C series
-- collect4k.pl: collects logs files on C series to local directory
-- convert262.pl: converts xml of a C series config < C620 to compatible
+- **clean4k.pl**: cleans rotated log files out from C series
+- **collect4k.pl**: collects logs files on C series to local directory
+- **convert262.pl**: converts xml of a C series config < C620 to compatible
   C620+ format
-- monitor4250.sh: simple snmp monitoring script for C series
-- monitor9200.sh: simple snmp monitoring script for D series
+- **monitor4250.sh**: simple snmp monitoring script for C series
+- **monitor9200.sh**: simple snmp monitoring script for D series
 
-- udplog: a udp logger on port 2600 for receiving and filtering udp
+- **udplog**: a udp logger on port 2600 for receiving and filtering udp
   transmitted logs from the sbc, you can put in a specific string to
-  filter on and it will only display those lines
+  filter on and it will only display those lines. Written in Google Go
 
-- autoback.py: auto backup script for c series, this was made to run as
+- **autoback.py**: auto backup script for c series, this was made to run as
   a cron every day and it will login, create a backup config, and save a
   copy of the show config to a file. It would then ftp those files to your
   local machine for keeping track of changes daily. This uses the python
