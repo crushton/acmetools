@@ -11,6 +11,12 @@ My place to put scripts and things related to lazy administration of acme packet
 - monitor4250.sh: simple snmp monitoring script for C series
 - monitor9200.sh: simple snmp monitoring script for D series
 
+- autoback.py: auto backup script for c series, this was made to run as
+  a cron every day and it will login, create a backup config, and save a
+  copy of the show config to a file. It would then ftp those files to your
+  local machine for keeping track of changes daily. This uses the python
+  pexpect module.
+
 License
 -------
 
