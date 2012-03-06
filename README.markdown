@@ -23,6 +23,14 @@ pretty.
   local machine for keeping track of changes daily. This uses the python
   pexpect module.
 
+DISCLAIMER
+----------
+
+I work at Acme Packet. Views expressed are my own and do not represent
+the view of the company. These tools provided are not officiallly
+supported by Acme Packet. USE AT YOUR OWN RISK.
+
+
 License
 -------
 
