@@ -18,9 +18,13 @@
 # This script ftp's the log files and crash dumps from a 9200 to the local machine.
 # It puts the files in a local directory of the hostname.
 
+#use strict;
+#use warnings 'all';
 use Net::FTP;
 use File::Path;
 use POSIX;
+use Archive::Tar;
+use File::Find;
 ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 
 $now = sprintf("%d%d%d",$hour,$min,$sec);
@@ -117,7 +121,7 @@ if ( $ftp->cwd('/6.0.0/logs') ) {
 
 @cores = sort(@cores);
 
-mkdir($dir);
+mkdir($dir) or die("Unable to create LOCAL directory\n");
 
 print "-- LOG FILES --\n";
 foreach $core (@cores) {
@@ -168,6 +172,17 @@ if ( !$dumpcheck ) { print "none...\n"; }
 
 $ftp->quit;
 
+print "\n";
+print "Creating archive...";
+my @inventory = ();
+find (sub { push @inventory, $File::Find::name }, $dir);
+my $tar = Archive::Tar->new();
+$tar->add_files( @inventory );
+$tar->write( "$dir.tar.gz", 9 );
+print "Done!\n";
+print "\n";
+print "Log Directory: $dir\n";
+print "Archive File: $dir.tar.gz\n";
 print "\n";
 exit 0;
 
