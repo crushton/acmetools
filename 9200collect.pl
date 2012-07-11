@@ -27,6 +27,7 @@ use Archive::Tar;
 use File::Find;
 ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 
+
 $now = sprintf("%d%d%d",$hour,$min,$sec);
 
 $host = $ARGV[0];
@@ -176,6 +177,7 @@ print "\n";
 print "Creating archive...";
 my @inventory = ();
 find (sub { push @inventory, $File::Find::name }, $dir);
+$Archive::Tar::DO_NOT_USE_PREFIX = 1;
 my $tar = Archive::Tar->new();
 $tar->add_files( @inventory );
 $tar->write( "$dir.tar.gz", 9 );
