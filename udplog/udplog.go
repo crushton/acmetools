@@ -1,17 +1,17 @@
 /*
- Copyright (c) 2012, Chris Rushton
+Copyright (c) 2012, Chris Rushton
 
- Permission to use, copy, modify, and distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 package main
 
@@ -42,12 +42,12 @@ func parseMessage(data string, addr net.Addr) {
     // splits the log message
     //   d[0] = logname@cpu/core
     //   d[1] = the log message
-    var d = strings.Split(data, ":", 2)
+    var d = strings.SplitN(data, ":", 2)
 
     // splits the logname and cpu/core
     //  f[0] = logfile name
     //  f[1] = the cpu/core
-    var f = strings.Split(d[0], "@", 2)
+    var f = strings.SplitN(d[0], "@", 2)
 
     // handles siplog flag
     if *siplogonly {
@@ -104,7 +104,7 @@ func main() {
   for {
     nr, addr, err := c.ReadFrom(buf[0:])
     if err != nil {
-      panic(err.String())
+      panic(err)
     }
     data := buf[0:nr]
     parseMessage(string(data), addr)
