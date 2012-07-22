@@ -16,9 +16,9 @@ use Socket;
 use POSIX;
 
 # globals
-%handles=();
-$maxRotateBytes=1000000;
-$maxFiles=12;
+my %handles=();
+my $maxRotateBytes=1000000;
+my $maxFiles=12;
 
 sub check_rotate {
   my $file = $_[0];
@@ -74,9 +74,9 @@ sub check_rotate {
 use Getopt::Std;
 my($opt_s, $opt_d, $opt_f, $opt_m);
 
-$socknum=2500;
-$logdir="/acmelog";
-$multi=1;
+my $socknum=2500;
+my $logdir="./acmelog";
+my $multi=1;
 getopt('sdfm');
 
 if ($opt_s) {
@@ -107,7 +107,7 @@ if ((length($logdir) > 1) || ($logdir ne ".")) {
 
 printf("logger.pl: Listening on socket %d; Logging to '%s' multi=%s rotate=%d@%d\n", $socknum, $logdir, ($multi==1) ? "Y" : "N", $maxFiles,$maxRotateBytes);
 
- $proto = getprotobyname('udp');
+ my $proto = getprotobyname('udp');
  if (socket(LISTEN, PF_INET, SOCK_DGRAM, $proto)) {
     setsockopt(LISTEN, SOL_SOCKET, SO_REUSEADDR, pack("l", 1));
     bind(LISTEN, sockaddr_in($socknum, INADDR_ANY));
@@ -123,28 +123,28 @@ printf("logger.pl: Listening on socket %d; Logging to '%s' multi=%s rotate=%d@%d
 #
 
 while (1) {
-    $from = recv(LISTEN, $rcvbuf, 1024, 0); 
-    $fromip = inet_ntoa((unpack_sockaddr_in($from))[1]);
+    my $from = recv(LISTEN, my $rcvbuf, 1024, 0); 
+    my $fromip = inet_ntoa((unpack_sockaddr_in($from))[1]);
 #    $toip = inet_ntoa((unpack_sockaddr_in(getsockname(LISTEN)))[1]);
     # get the target file
-    @fields=split(/:/, $rcvbuf);
-    $leaffile=$fields[0];
+    my @fields=split(/:/, $rcvbuf);
+    my $leaffile=$fields[0];
     # handle multiple ip-based subdirectories per SD...
     if ($multi != 0) {
-        $dir=$fromip;
+        my $dir=$fromip;
         if (! -d $dir) {
 	    mkdir $dir,0777;
 	}
-	$file="$dir/$leaffile";
+	my $file="$dir/$leaffile";
     }
     else {
-	$file=$leaffile;
+	my $file=$leaffile;
     }
     # remove the file prefix from the buffer...
-    $outbuf=substr($rcvbuf, length($leaffile)+1);
+    my $outbuf=substr($rcvbuf, length($leaffile)+1);
 
     # check to see if the file should be rotated...
-    check_rotate($file);
+    check_rotate(my $file);
 
     #
     # Check to see if the extracted filename already exists in our
