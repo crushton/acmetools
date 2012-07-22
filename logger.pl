@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 #
 # This is a simple PERL program for opening a UDP ocket & listening for
 # UDP logging datagrams.
@@ -10,6 +10,8 @@
 # A hash table (hashing filenames into file handles) is maintained to keep 
 # track of open files to which data is logged.  
 #
+use strict;
+use warnings 'all';
 use Socket;
 use POSIX;
 
