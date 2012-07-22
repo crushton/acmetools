@@ -13,6 +13,8 @@ pretty.
 - **monitor4250.sh**: simple snmp monitoring script for C series
 - **monitor9200.sh**: simple snmp monitoring script for D series
 
+- **logger.pl**:  original logger.pl udplog capturing script
+
 - **udplog**: a udp logger on port 2600 for receiving and filtering udp
   transmitted logs from the sbc, you can put in a specific string to
   filter on and it will only display those lines. Written in Google Go
