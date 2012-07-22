@@ -20,6 +20,7 @@ use Getopt::Std;
 my %handles        = ();
 my $maxRotateBytes = 1000000;
 my $maxFiles       = 12;
+our($opt_s, $opt_d, $opt_f, $opt_m);
 
 sub check_rotate {
     my $file = $_[0];
@@ -79,10 +80,8 @@ sub check_rotate {
 }
 
 # parse command line options
-my ( $opt_s, $opt_d, $opt_f, $opt_m );
-
 my $socknum = 2500;
-my $logdir  = "/acmelog";
+my $logdir  = ".";
 my $multi   = 1;
 getopt('sdfm');
 
