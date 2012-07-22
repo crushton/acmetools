@@ -7,115 +7,125 @@
 #
 # <file>:<log test>
 #
-# A hash table (hashing filenames into file handles) is maintained to keep 
-# track of open files to which data is logged.  
+# A hash table (hashing filenames into file handles) is maintained to keep
+# track of open files to which data is logged.
 #
 use strict;
 use warnings 'all';
 use Socket;
 use POSIX;
+use Getopt::Std;
 
 # globals
-my %handles=();
-my $maxRotateBytes=1000000;
-my $maxFiles=12;
+my %handles        = ();
+my $maxRotateBytes = 1000000;
+my $maxFiles       = 12;
 
 sub check_rotate {
-  my $file = $_[0];
-  my $done=0;
-  my $filesz;
-  my $i;
-  my $j;
-  my $tmp;
+    my $file = $_[0];
+    my $done = 0;
+    my $filesz;
+    my $i;
+    my $j;
+    my $tmp;
 
-  if ($handles{$file}) {
-      $tmp = sysseek($handles{$file}, 0, SEEK_CUR);
-      $filesz = $tmp;
-#      print "$file: $filesz of $maxRotateBytes\n";
-      if ($filesz > $maxRotateBytes) {
-#	   print "$file > $maxRotateBytes\n";
-	   for ($i = 1; $i < $maxFiles && $done == 0; ) {
-	       if (! -e "$file.$i") {
-		   $done=1;
-	       }
-	       else {
-		   $i++;
-               }
-	   }
-#	   print "largest suffix is $i\n";
+    if ( $handles{$file} ) {
+        $tmp = sysseek( $handles{$file}, 0, SEEK_CUR );
+        $filesz = $tmp;
 
-	   if ($i == $maxFiles) {
-#	     print "rmmax $file.$i\n";
-	     unlink("$file.$i");
-	   }
-	   # blank out the hashmap entry; a new file will
-	   # be opened when the next log message arrives
-#	   print "close $file\n";
-	   close($handles{$file});
-	   undef $handles{$file};
-	   # Now do the actual 'rotate'
-	   for ($j = $i - 1; $j >= 0; $j--, $i--) {
-	       if ($j == 0) {
-	           # move filename to filename.1
-#	           print "mv $file, $file.$i\n";
-	           rename($file, "$file.$i");
-	       }
-	       else {
-	           # move filename.i-1 to filename.i
-#	           print "mv $file.$j, $file.$i\n";
-	           rename("$file.$j", "$file.$i");
-		 }
-	     }
-	 }
+        #      print "$file: $filesz of $maxRotateBytes\n";
+        if ( $filesz > $maxRotateBytes ) {
+
+            #	   print "$file > $maxRotateBytes\n";
+            for ( $i = 1 ; $i < $maxFiles && $done == 0 ; ) {
+                if ( !-e "$file.$i" ) {
+                    $done = 1;
+                }
+                else {
+                    $i++;
+                }
+            }
+
+            #	   print "largest suffix is $i\n";
+
+            if ( $i == $maxFiles ) {
+
+                #	     print "rmmax $file.$i\n";
+                unlink("$file.$i");
+            }
+
+            # blank out the hashmap entry; a new file will
+            # be opened when the next log message arrives
+            #	   print "close $file\n";
+            close( $handles{$file} );
+            undef $handles{$file};
+
+            # Now do the actual 'rotate'
+            for ( $j = $i - 1 ; $j >= 0 ; $j--, $i-- ) {
+                if ( $j == 0 ) {
+
+                    # move filename to filename.1
+                    #	           print "mv $file, $file.$i\n";
+                    rename( $file, "$file.$i" );
+                }
+                else {
+                    # move filename.i-1 to filename.i
+                    #	           print "mv $file.$j, $file.$i\n";
+                    rename( "$file.$j", "$file.$i" );
+                }
+            }
+        }
     }
 }
 
 # parse command line options
-use Getopt::Std;
-my($opt_s, $opt_d, $opt_f, $opt_m);
+my ( $opt_s, $opt_d, $opt_f, $opt_m );
 
-my $socknum=2500;
-my $logdir="./acmelog";
-my $multi=1;
+my $socknum = 2500;
+my $logdir  = "/acmelog";
+my $multi   = 1;
 getopt('sdfm');
 
 if ($opt_s) {
-    $socknum=$opt_s;
-    $multi=0;
+    $socknum = $opt_s;
+    $multi   = 0;
 }
 if ($opt_d) {
     $logdir = $opt_d;
-    printf("logdir=%s\n", $logdir);
+    printf( "logdir=%s\n", $logdir );
 }
 if ($opt_f) {
     $maxFiles = $opt_f;
-    printf("maxFiles=%s\n", $maxFiles);
+    printf( "maxFiles=%s\n", $maxFiles );
 }
 if ($opt_m) {
     $maxFiles = $opt_m;
-    printf("maxRotateBytes=%s\n", $maxRotateBytes);
+    printf( "maxRotateBytes=%s\n", $maxRotateBytes );
 }
 
-# used to be $logdir[0] !- "."
-if ((length($logdir) > 1) || ($logdir ne ".")) {
-    if (! -d $logdir) {
-	printf("Invalid target directory specified\n");
-	exit;
+if ( ( length($logdir) > 1 ) || ( $logdir ne "." ) ) {
+    if ( !-d $logdir ) {
+        printf("Invalid target directory specified\n");
+        exit;
     }
     chdir($logdir) || die "Cannot change to $logdir";
 }
 
-printf("logger.pl: Listening on socket %d; Logging to '%s' multi=%s rotate=%d@%d\n", $socknum, $logdir, ($multi==1) ? "Y" : "N", $maxFiles,$maxRotateBytes);
+printf(
+"logger.pl: Listening on socket %d; Logging to '%s' multi=%s rotate=%d@%d\n",
+    $socknum, $logdir, ( $multi == 1 ) ? "Y" : "N",
+    $maxFiles, $maxRotateBytes
+);
 
- my $proto = getprotobyname('udp');
- if (socket(LISTEN, PF_INET, SOCK_DGRAM, $proto)) {
-    setsockopt(LISTEN, SOL_SOCKET, SO_REUSEADDR, pack("l", 1));
-    bind(LISTEN, sockaddr_in($socknum, INADDR_ANY));
-    listen(LISTEN, SOMAXCONN);
- }
- else { 
-     print STDERR "Failed to open listening socket : $!\n";
- } 
+my $proto = getprotobyname('udp');
+if ( socket( LISTEN, PF_INET, SOCK_DGRAM, $proto ) ) {
+    setsockopt( LISTEN, SOL_SOCKET, SO_REUSEADDR, pack( "l", 1 ) );
+    bind( LISTEN, sockaddr_in( $socknum, INADDR_ANY ) );
+    listen( LISTEN, SOMAXCONN );
+}
+else {
+    print STDERR "Failed to open listening socket : $!\n";
+}
 
 #
 # need to keep a dynamically instantiated table of logfile names to
@@ -123,46 +133,50 @@ printf("logger.pl: Listening on socket %d; Logging to '%s' multi=%s rotate=%d@%d
 #
 
 while (1) {
-    my $from = recv(LISTEN, my $rcvbuf, 1024, 0); 
-    my $fromip = inet_ntoa((unpack_sockaddr_in($from))[1]);
-#    $toip = inet_ntoa((unpack_sockaddr_in(getsockname(LISTEN)))[1]);
+    my $from = recv( LISTEN, my $rcvbuf, 1024, 0 );
+    my $fromip = inet_ntoa( ( unpack_sockaddr_in($from) )[1] );
+
+    #    $toip = inet_ntoa((unpack_sockaddr_in(getsockname(LISTEN)))[1]);
     # get the target file
-    my @fields=split(/:/, $rcvbuf);
-    my $leaffile=$fields[0];
+    my @fields = split( /:/, $rcvbuf );
+    my $leaffile = $fields[0];
+
     # handle multiple ip-based subdirectories per SD...
-    if ($multi != 0) {
-        my $dir=$fromip;
-        if (! -d $dir) {
-	    mkdir $dir,0777;
-	}
-	my $file="$dir/$leaffile";
+    if ( $multi != 0 ) {
+        my $dir = $fromip;
+        if ( !-d $dir ) {
+            mkdir $dir, 0777;
+        }
+        my $file = "$dir/$leaffile";
     }
     else {
-	my $file=$leaffile;
+        my $file = $leaffile;
     }
+
     # remove the file prefix from the buffer...
-    my $outbuf=substr($rcvbuf, length($leaffile)+1);
+    my $outbuf = substr( $rcvbuf, length($leaffile) + 1 );
 
     # check to see if the file should be rotated...
-    check_rotate(my $file);
+    check_rotate( my $file );
 
     #
     # Check to see if the extracted filename already exists in our
     # table of open file decriptors.
     #
-    if (! $handles{$file} ) {
-	if (open($handles{$file}, ">> $file")) {
-	  if (! -e "$file.1") {
-	    print "opened $file\n";
-	  }
-	}
-	else {
-	    print "Failed to open $file !!!\n";
-	}
+    if ( !$handles{$file} ) {
+        if ( open( $handles{$file}, ">> $file" ) ) {
+            if ( !-e "$file.1" ) {
+                print "opened $file\n";
+            }
+        }
+        else {
+            print "Failed to open $file !!!\n";
+        }
     }
-    
+
     # write to the file
-    syswrite($handles{$file}, "$outbuf\n");
+    syswrite( $handles{$file}, "$outbuf\n" );
+
     # listen for more messages...
-    listen(LISTEN, SOMAXCONN);
+    listen( LISTEN, SOMAXCONN );
 }
