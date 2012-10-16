@@ -158,7 +158,7 @@ foreach $coredump (@coredumps) {
             @fields=split(/\s+/,$file);
             $file = $fields[8];
             if ( $file =~ /^\.{1,2}$/ ) { next; }
-            $newfile = "$dumpath/$file";
+            $newfile = "$dumppath/$file";
             $ftp->binary;
             if ( $ftp->get($file,$newfile) ) {
                 print "Got Dump: $newfile\n";
