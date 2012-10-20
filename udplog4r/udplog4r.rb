@@ -15,4 +15,48 @@
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ###
 
+require 'eventmachine'
+require 'optparse'
+require 'pp'
 
+addr = '0.0.0.0'
+port = 2600
+
+
+optparse = OptionParser.new do|opts|
+  opts.banner = "Usage: udplog4r.rb [options]"
+  $sipmsg = false
+  opts.on( '-s', '--sipmsg', 'Filter sipmsg.log only' ) do
+    puts "Enabling sipmsg.log only..."
+    $sipmsg = true
+  end
+  $disable_options = false
+  opts.on( '-o', '--disable-options', 'Remove OPTIONS from being displayed' ) do
+    puts "Enabling filtering of OPTIONS messages..."
+    $disable_options = true
+  end
+end
+optparse.parse(ARGV)
+
+class PacketHandler < EM::Connection
+
+  def receive_data(data)
+    if /CSeq:.*OPTIONS/i.match(data)
+      return
+    end
+    if $sipmsg
+       if /sipmsg/.match(data)
+         puts data
+       end
+    else
+      puts data
+    end
+  end
+
+end
+
+EM.run {
+    EM.open_datagram_socket addr, port, PacketHandler
+    printf "Running on %s:%s...\n", addr, port
+    #EM.add_periodic_timer(1) { puts }
+}
