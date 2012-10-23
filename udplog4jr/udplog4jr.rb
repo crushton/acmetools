@@ -34,20 +34,31 @@ optparse = OptionParser.new do|opts|
   end
   $disable_options = false
   opts.on( '-o', '--disable-options', 'Remove OPTIONS from being displayed' ) do
-    puts "Enabling filtering of OPTIONS messages..."
     $disable_options = true
   end
 end
 optparse.parse(ARGV)
 
+if ( ($disable_options == true) and ($sipmsg == false) )
+  puts "ERROR: -o can only be used with -s"
+  exit
+end
+
+if $sipmsg == true
+  puts "Filtering sipmsg.log files only..."
+end
+if $disable_options == true 
+  puts "Filtering out all SIP OPTIONS methods..."
+end
+
 class PacketHandler < EM::Connection
 
   def receive_data(data)
-    if /CSeq:.*OPTIONS/i.match(data)
-      return
-    end
     if $sipmsg
        if /sipmsg/.match(data)
+         if ( $disable_options && /CSeq:.*OPTIONS/i.match(data) )
+           return
+         end
          puts data
        end
     else
