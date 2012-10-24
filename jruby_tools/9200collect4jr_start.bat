@@ -7,4 +7,4 @@ set JRUBY="java -Xmx500m -Xss1024k -jar %JRUBY_COMPLETE%"
 
 set SCRIPT="ruby/9200collect4jr.rb"
 
-%JRUBY% %SCRIPT% $1 $2 $3 $4 $5 $6 $7 $8 $9
+%JRUBY% %SCRIPT% %1 %2 %3 %4 %5 %6 %7 %8 %9%
