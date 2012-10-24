@@ -19,13 +19,53 @@ require 'logger'
 require 'net/ftp'
 require 'optparse'
 require 'pp'
+require 'highline/import'
+require 'ipaddr'
 
 log = Logger.new(STDOUT)
 log.level = Logger::INFO
 
-user = 'admin'
-passwd = ''
-host = ''
+user=nil
+passwd=nil
+host=nil
+
+optparse = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} <host> [options]"
+  opts.separator ""
+  opts.separator "Specific options:"
+  opts.on("-u", "--user [USER]", "Specify user on command line") do |f|
+    user = f
+  end
+  opts.on("-p", "--password [PASSWORD]", "Specify password on command line") do |f|
+    passwd = f
+  end
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts optparse
+    exit
+  end
+end
+optparse.parse!(ARGV)
+
+if ( ARGV.length < 1 || (IPAddr.new(ARGV[0]) rescue nil).nil? )
+  puts optparse
+  puts
+  log.warn("Missing or Invalid Host!")
+  exit
+else
+  host = ARGV[0]
+end
+
+if user.nil?
+  user = "admin"
+end
+if passwd.nil?
+  begin
+    passwd = ask("Enter password:  ") { |q| q.echo = "x" }
+  rescue
+  else
+  end
+end
+
 port = '41'
 debug = false
 passive = true
