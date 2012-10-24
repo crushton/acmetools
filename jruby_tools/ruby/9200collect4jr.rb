@@ -51,6 +51,10 @@ optparse.parse!(ARGV)
 
 if ( ARGV.length < 1 )
   host = ask("Enter hostname or ip: ")
+  if host.length < 1
+    log.warn("Invalid Length, please try again")
+    exit
+  end
 else
   host = ARGV[0]
 end
@@ -60,10 +64,10 @@ if user.nil?
 end
 
 if passwd.nil?
-  begin
-    passwd = ask("Enter password:  ") { |q| q.echo = "x" }
-  rescue
-  else
+  passwd = ask("Enter password:  ") { |q| q.echo = "x" }
+  if passwd.length < 1
+    log.warn("Invalid Length, please try again")
+    exit
   end
 end
 
