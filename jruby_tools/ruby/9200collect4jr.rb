@@ -28,9 +28,12 @@ log.level = Logger::INFO
 user=nil
 passwd=nil
 host=nil
+port = '41'
+debug = false
+passive = true
 
 optparse = OptionParser.new do |opts|
-  opts.banner = "Usage: #{File.basename($0)} <host> [options]"
+  opts.banner = "Usage: #{File.basename($0)} [host] [options]"
   opts.separator ""
   opts.separator "Specific options:"
   opts.on("-u", "--user [USER]", "Specify user on command line") do |f|
@@ -46,11 +49,8 @@ optparse = OptionParser.new do |opts|
 end
 optparse.parse!(ARGV)
 
-if ( ARGV.length < 1 || (IPAddr.new(ARGV[0]) rescue nil).nil? )
-  puts optparse
-  puts
-  log.warn("Missing or Invalid Host!")
-  exit
+if ( ARGV.length < 1 )
+  host = ask("Enter hostname or ip: ")
 else
   host = ARGV[0]
 end
@@ -58,6 +58,7 @@ end
 if user.nil?
   user = "admin"
 end
+
 if passwd.nil?
   begin
     passwd = ask("Enter password:  ") { |q| q.echo = "x" }
@@ -65,10 +66,6 @@ if passwd.nil?
   else
   end
 end
-
-port = '41'
-debug = false
-passive = true
 
 cards = ['0.0.0',
          '1.0.0',
