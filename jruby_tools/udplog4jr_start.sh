@@ -1,6 +1,7 @@
 #!/bin/sh
 
-unset GEM_PATH
-unset GEM_HOME
+. setEnv.sh
 
-java -Xms64m -Xmx256m -jar "./jruby-custom-1.7.0.jar" udplog4jr.rb $*
+SCRIPT="ruby/udplog4jr.rb"
+
+${JRUBY} ${SCRIPT} $*
