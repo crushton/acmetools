@@ -20,7 +20,7 @@ use Getopt::Std;
 my %handles        = ();
 my $maxRotateBytes = 1000000;
 my $maxFiles       = 12;
-our($opt_s, $opt_d, $opt_f, $opt_m);
+our($opt_p, $opt_d, $opt_f, $opt_m);
 
 sub check_rotate {
     my $file = $_[0];
@@ -80,12 +80,12 @@ sub check_rotate {
 }
 
 # parse command line options
-my $socknum = 2500;
+my $port = 2500;
 my $logdir  = ".";
-getopt('sdfm');
+getopt('pdfm');
 
-if ($opt_s) {
-    $socknum = $opt_s;
+if ($opt_p) {
+    $port = $opt_p;
 }
 if ($opt_d) {
     $logdir = $opt_d;
@@ -110,13 +110,13 @@ if ( ( length($logdir) > 1 ) || ( $logdir ne "." ) ) {
 
 printf(
 "logger.pl: Listening on port %d; Logging to '%s'; Rotate=%d@%d\n",
-    $socknum, $logdir, $maxFiles, $maxRotateBytes
+    $port, $logdir, $maxFiles, $maxRotateBytes
 );
 
 my $proto = getprotobyname('udp');
 if ( socket( LISTEN, PF_INET, SOCK_DGRAM, $proto ) ) {
     setsockopt( LISTEN, SOL_SOCKET, SO_REUSEADDR, pack( "l", 1 ) );
-    bind( LISTEN, sockaddr_in( $socknum, INADDR_ANY ) );
+    bind( LISTEN, sockaddr_in( $port, INADDR_ANY ) );
     listen( LISTEN, SOMAXCONN );
 }
 else {
