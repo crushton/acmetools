@@ -82,12 +82,10 @@ sub check_rotate {
 # parse command line options
 my $socknum = 2500;
 my $logdir  = ".";
-my $multi   = 1;
 getopt('sdfm');
 
 if ($opt_s) {
     $socknum = $opt_s;
-    $multi   = 0;
 }
 if ($opt_d) {
     $logdir = $opt_d;
@@ -111,9 +109,8 @@ if ( ( length($logdir) > 1 ) || ( $logdir ne "." ) ) {
 }
 
 printf(
-"logger.pl: Listening on socket %d; Logging to '%s' multi=%s rotate=%d@%d\n",
-    $socknum, $logdir, ( $multi == 1 ) ? "Y" : "N",
-    $maxFiles, $maxRotateBytes
+"logger.pl: Listening on port %d; Logging to '%s'; Rotate=%d@%d\n",
+    $socknum, $logdir, $maxFiles, $maxRotateBytes
 );
 
 my $proto = getprotobyname('udp');
@@ -132,31 +129,32 @@ else {
 #
 
 while (1) {
-    my $from = recv( LISTEN, my $rcvbuf, 1024, 0 );
+    my $from = recv LISTEN, my $rcvbuf, 1024, 0;
     my $fromip = inet_ntoa( ( unpack_sockaddr_in($from) )[1] );
-
-    #    $toip = inet_ntoa((unpack_sockaddr_in(getsockname(LISTEN)))[1]);
+    # $toip = inet_ntoa((unpack_sockaddr_in(getsockname(LISTEN)))[1]);
     # get the target file
-    my @fields = split( /:/, $rcvbuf );
-    my $leaffile = $fields[0];
 
-    # handle multiple ip-based subdirectories per SD...
-    if ( $multi != 0 ) {
-        my $dir = $fromip;
-        if ( !-d $dir ) {
-            mkdir $dir, 0777;
-        }
-        my $file = "$dir/$leaffile";
-    }
-    else {
-        my $file = $leaffile;
-    }
+    # skip packet if undesirable most likely empty packet
+    next if length($rcvbuf) <= 1;
+
+    my @fields = split( /:/, $rcvbuf );
+    # skip packet if no filename
+    next if length($fields[0]) < 1;
+    # skip packet if no data inside
+    next if !defined $fields[1] or (length($fields[1]) <= 1);
+
+    my $leaffile = $fields[0];
+    my $dir = $fromip;
+
+    # create directory and set filename
+    mkdir $dir, 0777 if !-d $dir;
+    my $file = "$dir/$leaffile";
 
     # remove the file prefix from the buffer...
-    my $outbuf = substr( $rcvbuf, length($leaffile) + 1 );
+    my $outbuf = substr $rcvbuf, length($leaffile) + 1;
 
     # check to see if the file should be rotated...
-    check_rotate( my $file );
+    check_rotate($file) if -e $file;
 
     #
     # Check to see if the extracted filename already exists in our
@@ -164,9 +162,7 @@ while (1) {
     #
     if ( !$handles{$file} ) {
         if ( open( $handles{$file}, ">> $file" ) ) {
-            if ( !-e "$file.1" ) {
-                print "opened $file\n";
-            }
+                print "opened $file\n" if !-e "$file.1";
         }
         else {
             print "Failed to open $file !!!\n";
@@ -174,8 +170,8 @@ while (1) {
     }
 
     # write to the file
-    syswrite( $handles{$file}, "$outbuf\n" );
+    syswrite $handles{$file}, "$outbuf\n";
 
     # listen for more messages...
-    listen( LISTEN, SOMAXCONN );
+    listen LISTEN, SOMAXCONN;
 }
